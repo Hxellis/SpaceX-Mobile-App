@@ -1,0 +1,13 @@
+to run and specify android emulator:
+>npx react-native run-android --list-devices
+
+
+dependencies:
+
+>npm install --save styled-components
+>npm install @types/styled-components @types/styled-components-react-native
+
+>npm install @react-navigation/native
+>npm install react-native-screens react-native-safe-area-context
+>npm install @react-navigation/stack
+>npm install react-native-gesture-handler
