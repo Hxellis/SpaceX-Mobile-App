@@ -33,13 +33,10 @@ import {SafeAreaView,ScrollView, StatusBar,StyleSheet,Text,useColorScheme,View} 
 import {Colors,DebugInstructions,Header,LearnMoreLinks,ReloadInstructions} from 'react-native/Libraries/NewAppScreen';
 
 import Welcome from "./screens/welcome";
-/*
 import AppLoading from 'expo-app-loading';
 import { useFonts } from 'expo-font';
-*/
 
 export default function App() {
-  /*
   let [fontsLoaded] = useFonts({
     "dosis_medium": require("./assets/fonts/dosis_medium.ttf"),
     "dosis_book": require("./assets/fonts/dosis_book.ttf")
@@ -47,7 +44,7 @@ export default function App() {
 
   if (!fontsLoaded) {
     return <AppLoading />
-  }*/
+  }
 
   return(
     <Welcome/>
