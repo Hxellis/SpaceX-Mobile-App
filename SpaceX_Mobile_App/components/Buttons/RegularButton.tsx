@@ -2,7 +2,7 @@ import React, { FunctionComponent} from "react";
 import styled from "styled-components/native"
 
 import { colors } from "../colors";
-import RegularText from "../Texts/Regulartext";
+import RegularText from "./../Texts/RegularText";
 import { GestureResponderEvent, StyleProp, TextStyle, ViewStyle } from "react-native/types";
 
 const ButtonView = styled.TouchableOpacity`
