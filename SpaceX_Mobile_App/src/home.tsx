@@ -3,17 +3,16 @@ import { StatusBar, StyleSheet, Text, View } from "react-native";
 import styled from "styled-components/native"
 import { ScrollView } from "react-native-gesture-handler";
 
-import { Container } from "./components/shared";
 import BigText from "./components/Texts/BigText";
 import SmallText from "./components/Texts/SmallText";
 import RegularButton from "./components/Buttons/RegularButton";
-import { FlatGrid } from 'react-native-super-grid';
+import { FlatGrid, SectionGrid } from 'react-native-super-grid';
 
 //image source
 import background from "./assets/pictures/spaceXheader.jpg";
 import blahaj from "./assets/pictures/blahaj.jpg"
 
-const HomeContainer = styled(Container)`
+const HomeContainer = styled.View`
     background-color: $(colors.secondary);
     justify-content: space-between;
     width: 100%
@@ -62,6 +61,15 @@ const styles = StyleSheet.create({
       fontSize: 12,
       color: '#fff',
     },
+    sectionHeader: {
+        flex: 1,
+        fontSize: 15,
+        fontWeight: '600',
+        alignItems: 'center',
+        backgroundColor: '#636e72',
+        color: 'white',
+        padding: 10,
+      },
 });
 
 interface WelcomeProps {
@@ -69,12 +77,16 @@ interface WelcomeProps {
 }
 
 const Home: FunctionComponent<WelcomeProps> = (props) => {
-    const [items, setItems] = React.useState([
+    const items = [
         { name: 'TURQUOISE', code: '#1abc9c' },
         { name: 'EMERALD', code: '#2ecc71' },
         { name: 'PETER RIVER', code: '#3498db' },
         { name: 'AMETHYST', code: '#9b59b6' },
-      ]);
+        { name: 'TURQUOISE', code: '#1abc9c' },
+        { name: 'EMERALD', code: '#2ecc71' },
+        { name: 'PETER RIVER', code: '#3498db' },
+        { name: 'AMETHYST', code: '#9b59b6' },
+      ];
     
     return (
         <>
@@ -84,23 +96,28 @@ const Home: FunctionComponent<WelcomeProps> = (props) => {
                     <Image source={background}/>
                 </ImageContainer>
 
+
                 <BottomSection>
-                    <FlatGrid
-                        itemDimension={140}
-                        data={items}
-                        style={styles.gridView}
-                        spacing={20}
-                        renderItem={({ item }) => (
-                            <View style={styles.itemContainer}>
-                                <Image style={{flex:1}} source={blahaj}/>
-                                <View style={{position: 'absolute', right: 0, justifyContent: 'center', alignItems: 'flex-end'}}>
-                                    <Text style={styles.itemName}>{item.name}</Text>
-                                    <Text style={styles.itemCode}>{item.code}</Text>
-                                </View>
-                                
+                <SectionGrid
+                    itemDimension={130}
+                    spacing={20}
+                    sections={[
+                        {
+                        title: 'Title1',
+                        data: items.slice(0, 4),
+                        },
+                    ]}
+                    style={styles.gridView}
+                    renderItem={({ item, section, index }) => (
+                        <View style={[styles.itemContainer, { backgroundColor: item.code }]}>
+                            <Image style={{flex:1}} source={blahaj}/>
+                            <View style={{position: 'absolute', right: 0, justifyContent: 'center', alignItems: 'flex-end'}}>
+                                <Text style={styles.itemName}>{item.name}</Text>
+                                <Text style={styles.itemCode}>{item.code}</Text>
                             </View>
-                        )}
-                    />
+                        </View>
+                    )}
+                />
 
                     <RegularButton onPress={() => props.navigation.navigate("Details")}>
                         Next Page
