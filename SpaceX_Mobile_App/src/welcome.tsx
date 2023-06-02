@@ -35,8 +35,12 @@ const BottomSection = styled.View`
     justify-content: flex-start;
 `;
 
+interface WelcomeProps {
+    navigation: any;
+}
 
-const Welcome: FunctionComponent = () => {
+const Welcome: FunctionComponent<WelcomeProps> = (props) => {
+
     return (
         <>
             <StatusBar barStyle="light-content"/>
@@ -51,7 +55,7 @@ const Welcome: FunctionComponent = () => {
                     <SmallText>
                         The small Text
                     </SmallText>
-                    <RegularButton onPress={() => {}}>
+                    <RegularButton onPress={() => props.navigation.navigate("Home")}>
                         Get Started
                     </RegularButton>
                 </BottomSection>

@@ -27,31 +27,16 @@ Bonus Points
 
 
 //libraries import
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {SafeAreaView,ScrollView, StatusBar,StyleSheet,Text,useColorScheme,View} from 'react-native';
-import {Colors,DebugInstructions,Header,LearnMoreLinks,ReloadInstructions} from 'react-native/Libraries/NewAppScreen';
-
-import RootStack from './src/RootStack';/*
-import AppLoading from 'expo-app-loading';
-import { useFonts } from 'expo-font';
-*/
+import React, { FunctionComponent } from "react";
+import Navigator from "./src/Navigator";
 
 export default function App() {
-  /*
-  let [fontsLoaded] = useFonts({
-    "dosis_medium": require("./assets/fonts/dosis_medium.ttf"),
-    "dosis_book": require("./assets/fonts/dosis_book.ttf")
-  })
+    return (
+        <Navigator/>
+    );
+};
 
-  if (!fontsLoaded) {
-    return <AppLoading />
-  }*/
 
-  return(
-    <RootStack/>
-  );
-}
 
 
 /*
