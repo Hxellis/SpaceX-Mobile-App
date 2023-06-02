@@ -8,8 +8,8 @@ import { GestureResponderEvent, StyleProp, TextStyle, ViewStyle } from "react-na
 const ButtonView = styled.TouchableOpacity`
     align-items: center;
     background-color: ${colors.primary};
-    width: 100%;
-    padding: 20px;
+    width: 90px;
+    padding: 5px;
     border-radius: 20px;
 `;
 
