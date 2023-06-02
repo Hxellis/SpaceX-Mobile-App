@@ -2,31 +2,31 @@ import React, { FunctionComponent } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import Welcome from "./welcome";
 import Home from "./Home";
+import Details from "./Details";
 
 type RootStackParamList = {
-    Welcome: undefined;
-    Home: undefined
+    Home: undefined;
+    Details: undefined
 };
 
 const Stack = createStackNavigator();
 
 const App: FunctionComponent = () => (
     <NavigationContainer>
-        <Stack.Navigator initialRouteName="Welcome">
+        <Stack.Navigator initialRouteName="Home">
 
             {/*first screen*/}
             <Stack.Screen 
-                name="Welcome" 
-                component={Welcome} 
+                name="Home" 
+                component={Home} 
                 options={{ headerShown: false }}
             />
 
             {/*second screen*/}
             <Stack.Screen 
-                name="Home" 
-                component={Home}
+                name="Details" 
+                component={Details}
                 options={{ headerShown: false }}
             />
             
