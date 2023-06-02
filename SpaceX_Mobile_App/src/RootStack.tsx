@@ -2,14 +2,13 @@ import React, { FunctionComponent } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import { colors } from "../components/colors";
-import Suzuran from "./../assets/pictures/FpsMo5RXgAI-rTI.png"
+import { colors } from "./components/colors";
+import Suzuran from "../assets/pictures/FpsMo5RXgAI-rTI.png"
 
-
-import Welcome from "./../screens/welcome";
-import Home from "./../screens/home";
-import Greeting from "../components/Header/Greeting";
-import Profile from "../components/Header/Profile";
+import Welcome from "./welcome";
+import Home from "./home";
+import Greeting from "./components/Header/Greeting";
+import Profile from "./components/Header/Profile";
 
 type RootStackParamList = {
     Welcome: undefined;

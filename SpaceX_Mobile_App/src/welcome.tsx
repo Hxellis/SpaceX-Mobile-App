@@ -2,13 +2,13 @@ import React, {FunctionComponent} from "react";
 import { StatusBar } from "react-native";
 import styled from "styled-components/native"
 
-import { Container } from "../components/shared";
-import { colors } from "../components/colors";
-import BigText from "../components/Texts/BigText";
-import SmallText from "../components/Texts/SmallText";
+import { Container } from "./components/shared";
+import { colors } from "./components/colors";
+import BigText from "./components/Texts/BigText";
+import SmallText from "./components/Texts/SmallText";
 
-import background from "./../assets/pictures/JPEG_20200225_210452.jpg";
-import RegularButton from "../components/Buttons/RegularButton";
+import background from "./assets/pictures/JPEG_20200225_210452.jpg";
+import RegularButton from "./components/Buttons/RegularButton";
 
 const WelcomeContainer = styled(Container)`
     background-color: $(colors.secondary);

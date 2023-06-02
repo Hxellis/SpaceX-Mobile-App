@@ -1,5 +1,7 @@
 to run and specify android emulator:
+>npx react-native start
 >npx react-native run-android --list-devices
+>npx react-native run-android --list-devices --port 8082
 
 
 dependencies:

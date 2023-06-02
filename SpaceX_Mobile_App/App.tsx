@@ -32,9 +32,7 @@ import type {PropsWithChildren} from 'react';
 import {SafeAreaView,ScrollView, StatusBar,StyleSheet,Text,useColorScheme,View} from 'react-native';
 import {Colors,DebugInstructions,Header,LearnMoreLinks,ReloadInstructions} from 'react-native/Libraries/NewAppScreen';
 
-import RootStack from './navigators/RootStack';
-import Welcome from "./screens/welcome";
-/*
+import RootStack from './src/RootStack';/*
 import AppLoading from 'expo-app-loading';
 import { useFonts } from 'expo-font';
 */
