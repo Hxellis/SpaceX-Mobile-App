@@ -28,102 +28,20 @@ Bonus Points
 
 //libraries import
 import React, { FunctionComponent } from "react";
+import * as ReactDOM from "react-dom";
 import Navigator from "./src/Navigator";
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+
+const client = new ApolloClient({
+  uri: "https://main--spacex-l4uc6p.apollographos.net/graphql",
+  cache: new InMemoryCache()
+})
 
 export default function App() {
-    return (
-        <Navigator/>
+;    return (
+		<ApolloProvider client={client}>
+			<Navigator/>
+		</ApolloProvider>
+		
     );
 };
-
-
-
-
-/*
-type SectionProps = PropsWithChildren<{title: string;}>;
-
-//format of each section
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text style={[styles.sectionTitle,{color: isDarkMode ? Colors.white : Colors.black,},]}>
-        {title}
-      </Text>
-      <Text style={[styles.sectionDescription,{color: isDarkMode ? Colors.light : Colors.dark,},]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-//css
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
-
-//basically main()
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-
-      <Header />
-
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={backgroundStyle}>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-
-          <LearnMoreLinks />
-          
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-export default App;
-*/

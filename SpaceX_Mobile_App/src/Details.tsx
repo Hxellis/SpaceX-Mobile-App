@@ -7,13 +7,6 @@ const images = [
     {id:3, img:require("./assets/pictures/SpaceX_Logo.png"), title:"SpaceX", color:"#33ccff"},
 ]
 
-const gridData = [
-    ["A1", "A2", "A3", "A4"],
-    ["B1", "B2", "B3", "B4"],
-    ["C1", "C2", "C3", "C4"],
-    ["D1", "D2", "D3", "D4"]
-];
-
 const styles = StyleSheet.create({
 container: {
     flex: 1,
@@ -69,7 +62,7 @@ const Details: FunctionComponent = () => {
     windowHeight=windowHeight-300;
 
     return (
-      <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <View style={[styles.scrollContainer, {height:windowHeight} ]}>
             <ScrollView
                 horizontal={true}
@@ -78,7 +71,17 @@ const Details: FunctionComponent = () => {
                 onScroll={Animated.event([{nativeEvent: {contentOffset: {x: scrollX}}}],{useNativeDriver: false})}
                 scrollEventThrottle={16}
             >
-                
+                {images.map((image, imageIndex) => {
+                    return (
+                        <Animated.View
+                        style={{ width: windowWidth}}
+                        key={imageIndex}
+                        >
+                        <Image  source={image.img} style={styles.card} />
+                            
+                        </Animated.View>
+                    );
+                })}
             </ScrollView>
 
         </View>
@@ -109,19 +112,6 @@ const Details: FunctionComponent = () => {
 }
 
 export default Details;
-{/*
-{images.map((image, imageIndex) => {
-                    return (
-                        <Animated.View
-                        style={{ width: windowWidth}}
-                        key={imageIndex}
-                        >
-                        <Image  source={image.img} style={styles.card} />
-                            
-                        </Animated.View>
-                    );
-                })}
-*/}
 
 
 {/*
@@ -155,29 +145,3 @@ export default Details;
 
         </View>
         */}
-
-        
-
-
-/*
-const HomeContainer = styled(Container)`
-    background-color: ${colors.greylight};
-    width: 100%
-    flex: 1
-`;
-
-
-const Details: FunctionComponent = () => {
-
-    return(
-        <HomeContainer>
-            <StatusBar barStyle={"dark-content"}/>
-                <BigText>
-                    Details Screen
-                </BigText>
-        </HomeContainer>
-    );
-};
-
-export default Details;
-*/
