@@ -6,6 +6,135 @@ import blahaj from "./assets/pictures/blahaj.jpg"
 import background from "./assets/pictures/spaceXheader.jpg";
 import { gql, useQuery } from "@apollo/client";
 
+const GET_ROCKETS = gql`
+    query Rockets {
+        rockets {
+            id
+            name
+            description
+            company
+            country
+        
+            active
+            success_rate_pct
+            cost_per_launch
+            first_flight
+        
+            type
+            mass {
+              kg
+            }
+            height {
+              meters
+            }
+            diameter {
+              meters
+            }
+            engines {
+              type
+            }
+            boosters
+            landing_legs {
+              number
+              material
+            }
+            wikipedia
+          }
+    }
+`;
+
+interface WelcomeProps {
+    navigation: any;
+}
+
+const RocketView = (props: WelcomeProps) => {
+
+    const scrollX = useRef(new Animated.Value(0)).current;
+    let { width: windowWidth, height:windowHeight } = useWindowDimensions();
+
+    const { data, loading, error } = useQuery(GET_ROCKETS);
+    
+    if (loading) {
+        console.log("loading");
+        return (
+            <Text>Fetching data...</Text>
+        ) //while loading return this
+    }
+
+    if (data) {                
+        console.log(data)
+
+        return(
+            <>              
+            <View style={[styles.scrollContainer]}>
+            <ScrollView
+                horizontal={true}
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
+                scrollEventThrottle={16}
+            >
+
+                {data.rockets.map(( rocketData: { name: string; country: string; } ) => {
+
+                    return (
+                        <View style={{width: windowWidth, paddingHorizontal: windowWidth*25/100, paddingTop: 10}}>
+                            <TouchableOpacity style={{width: "100%", height: windowHeight*60/100}} onPress={() => props.navigation.push("Details", rocketData)}>
+                                <ImageBackground source={blahaj} style={styles.card}>
+                                    <View style={{ position: 'absolute', right: 0,bottom: 0, justifyContent: 'center', alignItems: "flex-end" }}>
+                                                <Text style={styles.itemName}>{rocketData.name}</Text>
+                                                <Text style={styles.itemCode}>{rocketData.country}</Text>
+                                    </View>
+                                </ImageBackground>
+                                
+                            </TouchableOpacity>  
+                        </View>
+                    );
+                })}
+
+            </ScrollView>
+            </View>
+            <View style={styles.indicatorContainer}>
+                {data.rockets.map((item: string, itemIndex: number) => {
+                    const width = scrollX.interpolate({
+                    inputRange: [
+                        windowWidth * (itemIndex - 1),
+                        windowWidth * (itemIndex),
+                        windowWidth * (itemIndex + 1),
+                    ],
+                    outputRange: [8, 30, 8],
+                    extrapolate: "clamp",
+                    });
+                    return (
+                    <Animated.View style={[styles.normalDots, { width }, { backgroundColor: "#000000" }]} />
+                    );
+                })}
+            </View>
+            </>
+        );
+    }
+};
+
+const Home: FunctionComponent<WelcomeProps> = (props) => {
+
+    return (
+        <>
+            <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
+            
+            <View style={[styles.imageContainer]}>
+                <Image style={styles.image}source={background}/>
+            </View>
+
+                {/* @ts-expect-error Server Component */}
+                <RocketView navigation={props.navigation} />
+        
+        </>
+    );
+};
+
+export default Home;
+
+
 const styles = StyleSheet.create({
     imageContainer: {
         width: "100%",
@@ -45,7 +174,7 @@ const styles = StyleSheet.create({
     },
     card: {
         flex: 1,
-        marginVertical: 10,
+        marginVertical: 30,
         width:200,
         overflow: "hidden",
         alignSelf:"center",
@@ -54,7 +183,7 @@ const styles = StyleSheet.create({
         flexDirection:"row",
         justifyContent:"center",
         alignItems:"center",
-        paddingTop:20
+        paddingTop: 5
     },
     normalDots:{
         width: 8,
@@ -64,108 +193,3 @@ const styles = StyleSheet.create({
     },
 });
 
-const GET_ROCKETS = gql`
-    query Rockets {
-        rockets {
-            name
-            country
-        }
-    }
-`;
-
-interface viewProps {
-    navigation: any;
-}
-
-const RocketGridView = (props: viewProps) => {
-
-    const scrollX = useRef(new Animated.Value(0)).current;
-    let { width: windowWidth, height:windowHeight } = useWindowDimensions();
-    const { data, loading, error } = useQuery(GET_ROCKETS);
-
-    const onPress = () => props.navigation.navigate("Details");
-
-    if (loading) {
-        console.log("loading");
-        return (
-            <Text>Fetching data...</Text>
-        ) //while loading return this
-    }
-
-    if (data) {                
-        console.log(data)
-
-        return(
-            <>              
-            <View style={[styles.scrollContainer]}>
-            <ScrollView
-                horizontal={true}
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
-                scrollEventThrottle={16}
-            >
-
-                {data.rockets.map(( rocketData: { name: any; country: any; } ) => {
-                    return (
-                        <View style={{width: windowWidth, paddingHorizontal: windowWidth*25/100}}>
-                            <TouchableOpacity style={{width: "100%", height: windowWidth}} onPress={onPress}>
-                                <ImageBackground source={blahaj} style={styles.card}>
-                                    <View style={{ position: 'absolute', right: 0,bottom: 0, justifyContent: 'center', alignItems: "flex-end" }}>
-                                                <Text style={styles.itemName}>{rocketData.name}</Text>
-                                                <Text style={styles.itemCode}>{rocketData.country}</Text>
-                                    </View>
-                                </ImageBackground>
-                                
-                            </TouchableOpacity>  
-                        </View>
-                    );
-                })}
-
-            </ScrollView>
-            </View>
-            <View style={styles.indicatorContainer}>
-                {data.rockets.map((item: string, itemIndex: number) => {
-                    const width = scrollX.interpolate({
-                    inputRange: [
-                        windowWidth * (itemIndex - 1),
-                        windowWidth * (itemIndex),
-                        windowWidth * (itemIndex + 1),
-                    ],
-                    outputRange: [8, 30, 8],
-                    extrapolate: "clamp",
-                    });
-                    return (
-                    <Animated.View style={[styles.normalDots, { width }, { backgroundColor: "#000000" }]} />
-                    );
-                })}
-            </View>
-            </>
-        );
-    }
-};
-
-
-interface WelcomeProps {
-    navigation: any;
-}
-
-const Home: FunctionComponent<WelcomeProps> = (props) => {
-
-    return (
-        <>
-            <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
-            
-            <View style={[styles.imageContainer]}>
-                <Image style={styles.image}source={background}/>
-            </View>
-
-                {/* @ts-expect-error Server Component */}
-                <RocketGridView navigation={props.navigation} />
-        
-        </>
-    );
-};
-
-
-export default Home;
