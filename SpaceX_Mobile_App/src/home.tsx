@@ -1,6 +1,6 @@
 import React, {FunctionComponent, useRef} from "react";
 import { StatusBar, StyleSheet, View, Image, Animated, ImageBackground, ScrollView, Text, TouchableOpacity, useWindowDimensions } from "react-native";
-import blahaj from "./assets/pictures/blahaj.jpg"
+import blahaj from "./assets/pictures/blahaj.jpg";
 
 //image source
 import background from "./assets/pictures/spaceXheader.jpg";
@@ -57,15 +57,25 @@ const RocketView = (props: WelcomeProps) => {
     if (loading) {
         console.log("loading");
         return (
-            <Text>Fetching data...</Text>
-        ) //while loading return this
+            <>
+            <ImageBackground style={{ height: "100%" }} source={require('./assets/pictures/loading.gif')}>
+                <View style={{ position: 'absolute', left: 0, right: 0, bottom: 150, justifyContent: 'center', alignItems: "center" }}>
+                    <Text style={styles.itemName}>Loading</Text>
+                </View>
+            </ImageBackground>
+            </>
+          
+        ) 
     }
 
     if (data) {                
         console.log(data)
 
         return(
-            <>              
+            <>   
+            <View style={[styles.imageContainer]}>
+                <Image style={styles.image}source={background}/>
+            </View>           
             <View style={[styles.scrollContainer]}>
             <ScrollView
                 horizontal={true}
@@ -121,12 +131,10 @@ const Home: FunctionComponent<WelcomeProps> = (props) => {
         <>
             <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
             
-            <View style={[styles.imageContainer]}>
-                <Image style={styles.image}source={background}/>
-            </View>
+            
 
-                {/* @ts-expect-error Server Component */}
-                <RocketView navigation={props.navigation} />
+            {/* @ts-expect-error Server Component */}
+            <RocketView navigation={props.navigation} />
         
         </>
     );
