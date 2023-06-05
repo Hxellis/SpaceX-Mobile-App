@@ -130,11 +130,14 @@ const RocketView = (props: WelcomeProps) => {
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
                 scrollEventThrottle={16}
             >
-                {data.rockets.map((rocketData: { name: string; country: string }, index: number) => {
+                {data.rockets.map((rocketData: { id: String, name: string; country: string }, index: number) => {
                 const originalImageURL = originalImageURLs[index];
+                const rocketDataArray = Object.values(rocketData);
+                rocketDataArray.push(String(originalImageURL));
+                console.log(rocketDataArray);
                 return (
                     <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100, paddingTop: 10 }}>
-                    <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.push("Details", rocketData, originalImageURL)}>
+                    <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
                         <FastImage source={{ uri: originalImageURL }} style={styles.card}>
                             <View style={{ position: 'absolute', right: 0, bottom: 0, justifyContent: 'center', alignItems: "flex-end" }}>
                                 <Text style={styles.itemName}>{rocketData.name}</Text>
