@@ -1,61 +1,31 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from "react";
 import { StatusBar, StyleSheet, View, Image, Animated, ImageBackground, ScrollView, Text, TouchableOpacity, useWindowDimensions } from "react-native";
 import axios from "axios";
+import FastImage from "react-native-fast-image";
 import { SvgUri } from "react-native-svg";
 
 //image source
-import background from "./assets/pictures/spaceXheader.jpg";
-import { gql, useQuery } from "@apollo/client";
-import { createClient } from "pexels";
-import FastImage from "react-native-fast-image";
-
-const GET_ROCKETS = gql`
-    query Rockets {
-        rockets {
-            id
-            name
-            description
-            company
-            country
-        
-            active
-            success_rate_pct
-            cost_per_launch
-            first_flight
-        
-            type
-            mass {
-              kg
-            }
-            height {
-              meters
-            }
-            diameter {
-              meters
-            }
-            engines {
-              type
-            }
-            boosters
-            landing_legs {
-              number
-              material
-            }
-            wikipedia
-          }
-    }
-`;
-
-
+import background from "./assets/pictures/SpaceX_Logo.png";
+import { useQuery } from "@apollo/client";
+import { GET_ROCKETS } from "./query";
 
 interface WelcomeProps {
     navigation: any;
 }
 
-
 async function getOriginalImageURL(input: String): Promise<string | null> {
+
+    {/* due to wikipedia returning a sci-fi image instead of the spaceX one*/}
     if (input === "Starship") {
         input = "SpaceX_" + input
+    }
+    {/* due to wikipedia returning the logo .svg instead of actual image*/}
+    if (input === "Falcon 9") {
+        return "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2020/11/copernicus_sentinel-6_lifts_off_on_a_spacex_falcon_9_rocket/22340698-1-eng-GB/Copernicus_Sentinel-6_lifts_off_on_a_SpaceX_Falcon_9_rocket_pillars.jpg";
+    }
+    {/* due to wikipedia returning the logo .svg instead of actual image*/}
+    if (input === "Falcon Heavy") {
+        return "https://www.spacex.com/static/images/content/fh_performance.jpg";
     }
     try {
       const response = await axios.get(
@@ -65,16 +35,14 @@ async function getOriginalImageURL(input: String): Promise<string | null> {
       const pages = response.data.query.pages;
       const pageId = Object.keys(pages)[0];
       const originalImageURL = pages[pageId].original?.source;
-      console.log(originalImageURL.split("/"));
-      return originalImageURL || null;
+      //console.log(originalImageURL.split("/"));
+      return originalImageURL;
     } 
     catch (error) {
       console.error('Error fetching original image URL:', error);
       return null;
     }
 }
-
-
 
 const RocketView = (props: WelcomeProps) => {
 
@@ -90,7 +58,7 @@ const RocketView = (props: WelcomeProps) => {
             data.rockets.map(async (rocketData: { name: string }) => {
                 const originalImageURL = await getOriginalImageURL(rocketData.name);
                 
-                console.log(originalImageURL);
+                //console.log(originalImageURL);
                 return originalImageURL;
             })
         );
@@ -106,9 +74,9 @@ const RocketView = (props: WelcomeProps) => {
         console.log("loading");
         return (
         <>
-            <ImageBackground style={{ height: "100%" }} source={require('./assets/pictures/loading.gif')}>
+            <ImageBackground style={{flex: 1 }} source={require('./assets/pictures/loading.gif')}>
                 <View style={{ position: 'absolute', left: 0, right: 0, bottom: 150, justifyContent: 'center', alignItems: "center" }}>
-                    <Text style={styles.itemName}>Loading</Text>
+                    <Text style={styles.loadingText}>Loading...</Text>
                 </View>
             </ImageBackground>
         </>
@@ -118,12 +86,41 @@ const RocketView = (props: WelcomeProps) => {
     if (data) {
         return (
         <>
-            <View style={[styles.imageContainer]}>
-            <Image style={styles.image} source={background} />
-            </View>
+            <View style={styles.textAreaContainer}>
 
-            <View style={[styles.scrollContainer]}>
+                {data.rockets.map((rocketData: {name: string; country: string;}, itemIndex: number)=>{
+
+                    const inputRange=[
+                        windowWidth*(itemIndex-1),
+                        windowWidth*(itemIndex),
+                        windowWidth*(itemIndex+1),
+                    ];
+                    return(
+                        <>
+                        <Animated.Text style={[styles.rocketName, {
+                            transform: [{translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500]})}]
+                        }, {
+                            opacity: scrollX.interpolate({inputRange,outputRange: [0, 1, 0]})
+                        }]}>
+                            {rocketData.name}
+                        </Animated.Text>
+                        <Animated.Text style={[styles.rocketCountry, {
+                            transform: [{ translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500] }) }]
+                        }, {
+                            opacity: scrollX.interpolate({
+                                inputRange,
+                                outputRange: [0, 1, 0]
+                            })
+                        }]}>
+                            {"\n"}{rocketData.country}
+                        </Animated.Text>
+                        </>
+                    );
+                })}
+
+            </View>
             <ScrollView
+                style={[styles.scrollContainer]}
                 horizontal={true}
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
@@ -131,55 +128,50 @@ const RocketView = (props: WelcomeProps) => {
                 scrollEventThrottle={16}
             >
                 {data.rockets.map((rocketData: { id: String, name: string; country: string }, index: number) => {
-                const originalImageURL = originalImageURLs[index];
-                const rocketDataArray = Object.values(rocketData);
-                rocketDataArray.push(String(originalImageURL));
-                console.log(rocketDataArray);
-                return (
-                    <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100, paddingTop: 10 }}>
-                    <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
-                        <FastImage source={{ uri: originalImageURL }} style={styles.card}>
-                            <View style={{ position: 'absolute', right: 0, bottom: 0, justifyContent: 'center', alignItems: "flex-end" }}>
-                                <Text style={styles.itemName}>{rocketData.name}</Text>
-                                <Text style={styles.itemCode}>{rocketData.country}</Text>
-                            </View>
-                        </FastImage>
-                    </TouchableOpacity>
-                    </View>
-                );
+                    const originalImageURL = originalImageURLs[index];
+                    const rocketDataArray = Object.values(rocketData);
+                    rocketDataArray.push(String(originalImageURL));
+                    return (
+                        <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100 }}>
+                        <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
+                            <FastImage source={{ uri: String(originalImageURL) }} style={styles.rocketImage} />
+                        </TouchableOpacity>
+                        </View>
+                    );
                 })}
             </ScrollView>
+            <View style={styles.dotsContainer}>
+                {data.rockets.map((item: string, itemIndex: number) => {
+                    const width = scrollX.interpolate({
+                    inputRange: [
+                        windowWidth * (itemIndex - 1),
+                        windowWidth * (itemIndex),
+                        windowWidth * (itemIndex + 1),
+                    ],
+                    outputRange: [8, 30, 8],
+                    extrapolate: "clamp",
+                    });
+                    return (
+                    <Animated.View style={[styles.dots, { width }, { backgroundColor: "#FFFFFF" }]} />
+                    );
+                })}
             </View>
-                <View style={styles.indicatorContainer}>
-                    {data.rockets.map((item: string, itemIndex: number) => {
-                        const width = scrollX.interpolate({
-                        inputRange: [
-                            windowWidth * (itemIndex - 1),
-                            windowWidth * (itemIndex),
-                            windowWidth * (itemIndex + 1),
-                        ],
-                        outputRange: [8, 30, 8],
-                        extrapolate: "clamp",
-                        });
-                        return (
-                        <Animated.View style={[styles.normalDots, { width }, { backgroundColor: "#000000" }]} />
-                        );
-                    })}
-                </View>
-                </>
-            );
-        }
-    };
+        </>
+        );
+    }
+};
 
 const Home: FunctionComponent<WelcomeProps> = (props) => {
-
     return (
         <>
             <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
-            
+            <ImageBackground style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>
+            <View style={[styles.headerImageContainer]}>
+                <Image style={styles.headerImage} source={background} />
+            </View>
             {/* @ts-expect-error Server Component */}
-            <RocketView navigation={props.navigation} />
-        
+                <RocketView navigation={props.navigation} />
+            </ImageBackground>
         </>
     );
 };
@@ -188,56 +180,63 @@ export default Home;
 
 
 const styles = StyleSheet.create({
-    imageContainer: {
+    loadingText: {
+        fontSize: 30,
+        color: "#FFFFFF",
+        fontWeight: "bold",
+    },
+
+    headerImageContainer: {
+        flex: 1,
+        //backgroundColor: "#121121",
+        padding: 30,
+    },
+    headerImage: {
+        flex: 1,
         width: "100%",
-        height: "30%",
     },
-    image: {
+
+    textAreaContainer:{
+        //backgroundColor: "#121121",
+        paddingTop: 20,        
+        width:"100%",
         flex: 1,
-        width: undefined
     },
-    itemContainer: {
-        justifyContent: 'flex-end',
-        borderRadius: 5,
-        padding:20,
-        width: 300,
-        height: 400,
-        flex: 1
+    rocketName:{
+        position:"absolute",
+        fontSize: 25,
+        color: "#FFFFFF",
+        fontFamily: "PTSans-Bold",
+        textAlign:"center",
+        width:"100%",
     },
-    itemName: {
-        fontSize: 16,
-        color: '#fff',
-        fontWeight: '600',
-    },
-    itemCode: {
-        fontWeight: '600',
-        fontSize: 12,
-        color: '#fff',
+    rocketCountry:{
+        position:"absolute",
+        fontSize: 18,
+        color: "#FFFFFF",
+        fontFamily: "PTSans-Regular",
+        textAlign:"center",
+        width:"100%",
+        paddingTop: 10
     },
 
-
+    
     scrollContainer: {
-        shadowColor:"#6A6C6E",
-        shadowOffset:{
-            width:10,
-            height:-10,
-        },
-        shadowOpacity:1,
+        //backgroundColor: "#121121",
     },
-    card: {
+    rocketImage: {
         flex: 1,
-        marginVertical: 30,
-        width:200,
-        overflow: "hidden",
-        alignSelf:"center",
+        width: "100%",
     },
-    indicatorContainer:{
+
+    dotsContainer:{
+        //backgroundColor: "#121121",
         flexDirection:"row",
         justifyContent:"center",
         alignItems:"center",
-        paddingTop: 5
+        paddingBottom: 30
     },
-    normalDots:{
+    dots:{
         width: 8,
         height: 8,
         borderRadius: 4,
