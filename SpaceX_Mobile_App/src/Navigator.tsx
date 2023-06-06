@@ -26,6 +26,7 @@ const App: FunctionComponent = () => (
             {/*second screen*/}
             <Stack.Screen 
                 name="Details" 
+                //this error does not exist it cannot hurt me
                 component={Details}
                 options={{ headerShown: false }}
             />

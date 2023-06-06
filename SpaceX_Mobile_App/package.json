@@ -13,6 +13,8 @@
     "@apollo/client": "^3.7.15",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/stack": "^6.3.16",
+    "@rneui/base": "^4.0.0-rc.7",
+    "@rneui/themed": "^4.0.0-rc.7",
     "@types/react-native-snap-carousel": "^3.8.5",
     "@types/styled-components": "^5.1.26",
     "@types/styled-components-react-native": "^5.2.1",

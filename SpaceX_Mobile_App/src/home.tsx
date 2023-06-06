@@ -1,95 +1,80 @@
 import React, {FunctionComponent, useEffect, useRef, useState} from "react";
-import { StatusBar, StyleSheet, View, Image, Animated, ImageBackground, ScrollView, Text, TouchableOpacity, useWindowDimensions } from "react-native";
-import axios from "axios";
+import { StatusBar, View,  Animated, ScrollView, Text, TouchableOpacity, useWindowDimensions } from "react-native";
 import FastImage from "react-native-fast-image";
-import { SvgUri } from "react-native-svg";
-
-//image source
-import background from "./assets/pictures/SpaceX_Logo.png";
 import { useQuery } from "@apollo/client";
-import { GET_ROCKETS } from "./query";
 
-interface WelcomeProps {
+//imports from other files
+import { GET_ROCKETS } from "./spaceX_query";
+import { homeStyles } from "./styles";
+import { getOriginalImageURL } from "./wikipedia_api";
+
+//header image
+import headerImage from "./assets/pictures/SpaceX_Logo.png";
+
+interface HomeProps {
     navigation: any;
 }
 
-async function getOriginalImageURL(input: String): Promise<string | null> {
+//hold the carousel element for rocket text, picture, and pagination indicator
+const RocketView = (props: HomeProps) => {
 
-    {/* due to wikipedia returning a sci-fi image instead of the spaceX one*/}
-    if (input === "Starship") {
-        input = "SpaceX_" + input
-    }
-    {/* due to wikipedia returning the logo .svg instead of actual image*/}
-    if (input === "Falcon 9") {
-        return "https://www.esa.int/var/esa/storage/images/esa_multimedia/images/2020/11/copernicus_sentinel-6_lifts_off_on_a_spacex_falcon_9_rocket/22340698-1-eng-GB/Copernicus_Sentinel-6_lifts_off_on_a_SpaceX_Falcon_9_rocket_pillars.jpg";
-    }
-    {/* due to wikipedia returning the logo .svg instead of actual image*/}
-    if (input === "Falcon Heavy") {
-        return "https://www.spacex.com/static/images/content/fh_performance.jpg";
-    }
-    try {
-      const response = await axios.get(
-        'https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=' + input
-      );
-      
-      const pages = response.data.query.pages;
-      const pageId = Object.keys(pages)[0];
-      const originalImageURL = pages[pageId].original?.source;
-      //console.log(originalImageURL.split("/"));
-      return originalImageURL;
-    } 
-    catch (error) {
-      console.error('Error fetching original image URL:', error);
-      return null;
-    }
-}
-
-const RocketView = (props: WelcomeProps) => {
-
+    //styling variables
     const scrollX = useRef(new Animated.Value(0)).current;
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-
-    const [originalImageURLs, setOriginalImageURLs] = useState<(string | null)[]>([]);
-
+    
+    //loads data from GraphQL
     const { data, loading, error } = useQuery(GET_ROCKETS);
 
-    const fetchOriginalImageURLs = async () => {
-        const imageURLs = await Promise.all(
-            data.rockets.map(async (rocketData: { name: string }) => {
-                const originalImageURL = await getOriginalImageURL(rocketData.name);
-                
-                //console.log(originalImageURL);
-                return originalImageURL;
-            })
-        );
-        setOriginalImageURLs(imageURLs);
-    };
+    //loads data from wikipedia
+    const [imageURL, setImageURL] = useState<(string | null)[]>([]);
+    useEffect(() => {
+        const fetchOriginalImageURLs = async () => {
+            const url = await Promise.all(
+                data.rockets.map(async (rocketData: { name: string }) => {
+                    const originalImageURL = await getOriginalImageURL(rocketData.name);
+                    return originalImageURL;
+                })
+            );
+            //update hook with url array with the image links
+            setImageURL(url);
+        };
+        //fetches wikipedia pictures once GraphQL data is available
+        if (data) {
+            fetchOriginalImageURLs();
+        }
+        //to re-run if data changes
+    }, [data]);
 
-    useEffect(() => {(async () => {
-        await fetchOriginalImageURLs();
-        })();
-    }, []);
-
-    if (loading) {
-        console.log("loading");
-        return (
+    return (
         <>
-            <ImageBackground style={{flex: 1 }} source={require('./assets/pictures/loading.gif')}>
+        {/* render loading screen for GraphQL data loading status */}
+        {loading && (
+            <FastImage style={{ flex: 1 }} source={require('./assets/pictures/loading.gif')}>
                 <View style={{ position: 'absolute', left: 0, right: 0, bottom: 150, justifyContent: 'center', alignItems: "center" }}>
-                    <Text style={styles.loadingText}>Loading...</Text>
+                    <Text style={homeStyles.loadingText}>Loading...</Text>
                 </View>
-            </ImageBackground>
-        </>
-        );
-    }
-
-    if (data) {
-        return (
+            </FastImage>
+        )}
+        {/* render error screen if GraphQL data somehow dies or smthin */}
+        {error && (
+            <View style={{ backgroundColor: "#FFFFFF", height: "100%", justifyContent: 'center' }}>
+                <View style={[homeStyles.errorContainer]}>
+                    <FastImage style={{ flex: 1 }} resizeMode="contain" source={require("./assets/pictures/load_failed.png")}/>
+                    <Text style={homeStyles.errorText}>Encountered an error :(</Text>
+                </View>
+            </View>
+        )}
+        {/* render home screen if GraphQl data and wikipedia pictures are loaded */}
+        {data && (
         <>
-            <View style={styles.textAreaContainer}>
+            {/* spaceX logo */}
+            <View style={[homeStyles.headerImageContainer]}>
+                <FastImage style={homeStyles.headerImage} source={headerImage} />
+            </View>
 
+            {/* rocket name and country*/}
+            <View style={homeStyles.textAreaContainer}>
                 {data.rockets.map((rocketData: {name: string; country: string;}, itemIndex: number)=>{
-
                     const inputRange=[
                         windowWidth*(itemIndex-1),
                         windowWidth*(itemIndex),
@@ -97,14 +82,14 @@ const RocketView = (props: WelcomeProps) => {
                     ];
                     return(
                         <>
-                        <Animated.Text style={[styles.rocketName, {
+                        <Animated.Text style={[homeStyles.rocketName, {
                             transform: [{translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500]})}]
                         }, {
                             opacity: scrollX.interpolate({inputRange,outputRange: [0, 1, 0]})
                         }]}>
                             {rocketData.name}
                         </Animated.Text>
-                        <Animated.Text style={[styles.rocketCountry, {
+                        <Animated.Text style={[homeStyles.rocketCountry, {
                             transform: [{ translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500] }) }]
                         }, {
                             opacity: scrollX.interpolate({
@@ -117,10 +102,11 @@ const RocketView = (props: WelcomeProps) => {
                         </>
                     );
                 })}
-
             </View>
+
+            {/* rocket pictures */}
             <ScrollView
-                style={[styles.scrollContainer]}
+                style={[homeStyles.scrollContainer]}
                 horizontal={true}
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
@@ -128,19 +114,22 @@ const RocketView = (props: WelcomeProps) => {
                 scrollEventThrottle={16}
             >
                 {data.rockets.map((rocketData: { id: String, name: string; country: string }, index: number) => {
-                    const originalImageURL = originalImageURLs[index];
+                    
                     const rocketDataArray = Object.values(rocketData);
-                    rocketDataArray.push(String(originalImageURL));
+                    rocketDataArray.push(String(imageURL[index]));
+
                     return (
                         <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100 }}>
                         <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
-                            <FastImage source={{ uri: String(originalImageURL) }} style={styles.rocketImage} />
+                            <FastImage source={{ uri: String(imageURL[index])}} style={homeStyles.rocketImage} />
                         </TouchableOpacity>
                         </View>
                     );
                 })}
             </ScrollView>
-            <View style={styles.dotsContainer}>
+
+            {/* pagination */}
+            <View style={homeStyles.dotsContainer}>
                 {data.rockets.map((item: string, itemIndex: number) => {
                     const width = scrollX.interpolate({
                     inputRange: [
@@ -152,94 +141,26 @@ const RocketView = (props: WelcomeProps) => {
                     extrapolate: "clamp",
                     });
                     return (
-                    <Animated.View style={[styles.dots, { width }, { backgroundColor: "#FFFFFF" }]} />
+                    <Animated.View style={[homeStyles.dots, { width }, { backgroundColor: "#FFFFFF" }]} />
                     );
                 })}
             </View>
+            </>
+        )}
         </>
-        );
-    }
+    );
 };
 
-const Home: FunctionComponent<WelcomeProps> = (props) => {
+//functional component to export to navigation
+const Home: FunctionComponent<HomeProps> = (props) => {
     return (
         <>
             <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
-            <ImageBackground style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>
-            <View style={[styles.headerImageContainer]}>
-                <Image style={styles.headerImage} source={background} />
-            </View>
-            {/* @ts-expect-error Server Component */}
+            <FastImage style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>
                 <RocketView navigation={props.navigation} />
-            </ImageBackground>
+            </FastImage>
         </>
     );
 };
 
 export default Home;
-
-
-const styles = StyleSheet.create({
-    loadingText: {
-        fontSize: 30,
-        color: "#FFFFFF",
-        fontWeight: "bold",
-    },
-
-    headerImageContainer: {
-        flex: 1,
-        //backgroundColor: "#121121",
-        padding: 30,
-    },
-    headerImage: {
-        flex: 1,
-        width: "100%",
-    },
-
-    textAreaContainer:{
-        //backgroundColor: "#121121",
-        paddingTop: 20,        
-        width:"100%",
-        flex: 1,
-    },
-    rocketName:{
-        position:"absolute",
-        fontSize: 25,
-        color: "#FFFFFF",
-        fontFamily: "PTSans-Bold",
-        textAlign:"center",
-        width:"100%",
-    },
-    rocketCountry:{
-        position:"absolute",
-        fontSize: 18,
-        color: "#FFFFFF",
-        fontFamily: "PTSans-Regular",
-        textAlign:"center",
-        width:"100%",
-        paddingTop: 10
-    },
-
-    
-    scrollContainer: {
-        //backgroundColor: "#121121",
-    },
-    rocketImage: {
-        flex: 1,
-        width: "100%",
-    },
-
-    dotsContainer:{
-        //backgroundColor: "#121121",
-        flexDirection:"row",
-        justifyContent:"center",
-        alignItems:"center",
-        paddingBottom: 30
-    },
-    dots:{
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginHorizontal: 5,
-    },
-});
