@@ -27,6 +27,7 @@ const RocketView = (props: HomeProps) => {
 
     //loads data from wikipedia
     const [imageURL, setImageURL] = useState<(string | null)[]>([]);
+    const [errorState, setErrorState] = useState(false);
     useEffect(() => {
         const fetchOriginalImageURLs = async () => {
             const url = await Promise.all(
@@ -34,9 +35,15 @@ const RocketView = (props: HomeProps) => {
                     const originalImageURL = await getOriginalImageURL(rocketData.name);
                     return originalImageURL;
                 })
-            );
-            //update hook with url array with the image links
-            setImageURL(url);
+            ).then(function(url) {
+                //update hook with url array with the image links
+                setImageURL(url);
+            })
+            .catch(function (error){
+                console.log(error);
+                setErrorState(true);
+            });
+            
         };
         //fetches wikipedia pictures once GraphQL data is available
         if (data) {
@@ -55,8 +62,8 @@ const RocketView = (props: HomeProps) => {
                 </View>
             </FastImage>
         )}
-        {/* render error screen if GraphQL data somehow dies or smthin */}
-        {error && (
+        {/* render error screen if GraphQL data somehow dies or fail to get pictures from wikipedia */}
+        {error || errorState && (
             <View style={{ backgroundColor: "#FFFFFF", height: "100%", justifyContent: 'center' }}>
                 <View style={[homeStyles.errorContainer]}>
                     <FastImage style={{ flex: 1 }} resizeMode="contain" source={require("./assets/pictures/load_failed.png")}/>
