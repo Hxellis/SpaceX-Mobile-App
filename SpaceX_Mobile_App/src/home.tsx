@@ -29,13 +29,14 @@ const RocketView = (props: HomeProps) => {
     //loads data from GraphQL
     const { data, loading, error } = useQuery(GET_ROCKETS);
 
+    //hooks to update data
     const [launched, setLaunched] = useState(false);
-
-    //loads data from wikipedia
     const [imageURL, setImageURL] = useState<(string | null)[]>([]);
     const [errorState, setErrorState] = useState(false);
+
+    //hook to do functions on render
     useEffect(() => {
-        
+        //fucntion to loads data from wikipedia
         const fetchOriginalImageURLs = async () => {
             const url = await Promise.all(
                 data.rockets.map(async (rocketData: { name: string }) => {
@@ -52,6 +53,7 @@ const RocketView = (props: HomeProps) => {
             });
             
         };
+        //function to check if app is launched for the first time
         const launchCheck = async () => {
             const hasLaunched = await getItemFor(HAS_LAUNCHED);
             if (hasLaunched) {
@@ -61,7 +63,10 @@ const RocketView = (props: HomeProps) => {
                 await storeData(HAS_LAUNCHED, "true");
             }
         };
+
+        //calls the above function
         launchCheck();
+
         //fetches wikipedia pictures once GraphQL data is available
         if (data) {
             fetchOriginalImageURLs();
@@ -69,8 +74,6 @@ const RocketView = (props: HomeProps) => {
         //to re-run if data changes
     }, [data]);
     
-    console.log(launched);
-
     return (
         <>
         {/* render loading screen for GraphQL data loading status */}
@@ -93,6 +96,7 @@ const RocketView = (props: HomeProps) => {
         {/* render home screen if GraphQl data and wikipedia pictures are loaded */}
         {data && (
         <>
+        {/* first time welcome message */}
         { launched?    
             null:
             Alert.alert('Welcome to the SpaceX Mobile App',':D',
@@ -108,7 +112,7 @@ const RocketView = (props: HomeProps) => {
 
             {/* rocket name and country (cannot be put with pictures due to scroll view horizontal) */}
             <View style={homeStyles.textAreaContainer}>
-                {data.rockets.map((rocketData: {name: string; country: string;}, itemIndex: number)=>{
+                {data.rockets.map((rocketData: {name: string; country: string;}, itemIndex: number)=> {
                     const inputRange=[
                         windowWidth*(itemIndex-1),
                         windowWidth*(itemIndex),
@@ -116,22 +120,14 @@ const RocketView = (props: HomeProps) => {
                     ];
                     return(
                         <>
-                        <Animated.Text style={[homeStyles.rocketName, {
+                        {/* animated text that moves in the X axis according to user interaction */}
+                        <Animated.Text key={rocketData.name} style={[homeStyles.rocketText, {
                             transform: [{translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500]})}]
                         }, {
                             opacity: scrollX.interpolate({inputRange,outputRange: [0, 1, 0]})
                         }]}>
-                            {rocketData.name}
-                        </Animated.Text>
-                        <Animated.Text style={[homeStyles.rocketCountry, {
-                            transform: [{ translateX: scrollX.interpolate({ inputRange, outputRange: [500, 0, -500] }) }]
-                        }, {
-                            opacity: scrollX.interpolate({
-                                inputRange,
-                                outputRange: [0, 1, 0]
-                            })
-                        }]}>
-                            {"\n"}{rocketData.country}
+                            <Text style={homeStyles.rocketName}>{rocketData.name}</Text>
+                            <Text style={homeStyles.rocketCountry}>{"\n"}{rocketData.country}</Text>
                         </Animated.Text>
                         </>
                     );
@@ -147,16 +143,17 @@ const RocketView = (props: HomeProps) => {
                 onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
                 scrollEventThrottle={16}
             >
-                {data.rockets.map((rocketData: { id: String, name: string; country: string }, index: number) => {
+                {data.rockets.map((rocketData: { id: string, name: string; country: string }, index: number) => {
                     
                     const rocketDataArray = Object.values(rocketData);
                     rocketDataArray.push(String(imageURL[index]));
 
                     return (
-                        <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100 }}>
-                        <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
-                            <FastImage source={imageURL[index]===undefined? require("./assets/pictures/loading_circle.gif"): { uri: String(imageURL[index])}} style={homeStyles.rocketImage}/>
-                        </TouchableOpacity>
+                        <View key={rocketData.id} style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100 }}>
+                            <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
+                                {/* uses a placeholder "loading.gif" while image is not loaded */}
+                                <FastImage source={imageURL[index]===undefined? require("./assets/pictures/loading_circle.gif"): { uri: String(imageURL[index])}} style={homeStyles.rocketImage}/>
+                            </TouchableOpacity>
                         </View>
                     );
                 })}
@@ -171,11 +168,12 @@ const RocketView = (props: HomeProps) => {
                         windowWidth * (itemIndex),
                         windowWidth * (itemIndex + 1),
                     ],
-                    outputRange: [8, 30, 8],
+                    //lengths of dots [right side, active, left side]
+                    outputRange: [10, 30, 10],
                     extrapolate: "clamp",
                     });
                     return (
-                    <Animated.View style={[homeStyles.dots, { width }, { backgroundColor: "#FFFFFF" }]} />
+                    <Animated.View key={itemIndex} style={[homeStyles.dots, { width }, { backgroundColor: "#FFFFFF" }]} />
                     );
                 })}
             </View>
@@ -187,8 +185,7 @@ const RocketView = (props: HomeProps) => {
 
 //functional component to export to navigation
 const Home: FunctionComponent<HomeProps> = (props) => {
-    return (
-        
+    return ( 
         <>
         <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
         <FastImage style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>

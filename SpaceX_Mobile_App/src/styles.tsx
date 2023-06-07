@@ -32,21 +32,19 @@ export const homeStyles = StyleSheet.create({
         width:"100%",
         flex: 1,
     },
-    rocketName:{
+    rocketText:{
         position:"absolute",
-        fontSize: 25,
-        color: "#FFFFFF",
-        fontFamily: "PTSans-Bold",
         textAlign:"center",
+        color: "#FFFFFF",
         width:"100%",
     },
+    rocketName:{
+        fontSize: 25,
+        fontFamily: "PTSans-Bold",
+    },
     rocketCountry:{
-        position:"absolute",
         fontSize: 18,
-        color: "#FFFFFF",
         fontFamily: "PTSans-Regular",
-        textAlign:"center",
-        width:"100%",
         paddingTop: 10
     },
 
