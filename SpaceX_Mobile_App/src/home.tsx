@@ -7,13 +7,17 @@ import { useQuery } from "@apollo/client";
 import { GET_ROCKETS } from "./spaceX_query";
 import { homeStyles } from "./styles";
 import { getOriginalImageURL } from "./wikipedia_api";
+import { storeData ,getItemFor } from "./checkLaunched";
 
 //header image
 import headerImage from "./assets/pictures/SpaceX_Logo.png";
+import { Alert } from "react-native";
 
 interface HomeProps {
     navigation: any;
 }
+
+const HAS_LAUNCHED = "HAS_LAUNCHED";
 
 //hold the carousel element for rocket text, picture, and pagination indicator
 const RocketView = (props: HomeProps) => {
@@ -25,10 +29,13 @@ const RocketView = (props: HomeProps) => {
     //loads data from GraphQL
     const { data, loading, error } = useQuery(GET_ROCKETS);
 
+    const [launched, setLaunched] = useState(false);
+
     //loads data from wikipedia
     const [imageURL, setImageURL] = useState<(string | null)[]>([]);
     const [errorState, setErrorState] = useState(false);
     useEffect(() => {
+        
         const fetchOriginalImageURLs = async () => {
             const url = await Promise.all(
                 data.rockets.map(async (rocketData: { name: string }) => {
@@ -40,17 +47,29 @@ const RocketView = (props: HomeProps) => {
                 setImageURL(url);
             })
             .catch(function (error){
-                console.log(error);
+                console.log("Error generating image URL: " + error);
                 setErrorState(true);
             });
             
         };
+        const launchCheck = async () => {
+            const hasLaunched = await getItemFor(HAS_LAUNCHED);
+            if (hasLaunched) {
+                setLaunched(true);
+            }
+            else {
+                await storeData(HAS_LAUNCHED, "true");
+            }
+        };
+        launchCheck();
         //fetches wikipedia pictures once GraphQL data is available
         if (data) {
             fetchOriginalImageURLs();
         }
         //to re-run if data changes
     }, [data]);
+    
+    console.log(launched);
 
     return (
         <>
@@ -74,12 +93,20 @@ const RocketView = (props: HomeProps) => {
         {/* render home screen if GraphQl data and wikipedia pictures are loaded */}
         {data && (
         <>
+        { launched?    
+            null:
+            Alert.alert('Welcome to the SpaceX Mobile App',':D',
+                [{text: 'OK', onPress: () => {}},],
+                {cancelable: false},
+            )
+        }
+        
             {/* spaceX logo */}
             <View style={[homeStyles.headerImageContainer]}>
-                <FastImage style={homeStyles.headerImage} source={headerImage} />
+                <FastImage style={homeStyles.headerImage} resizeMode="cover" source={headerImage} />
             </View>
 
-            {/* rocket name and country*/}
+            {/* rocket name and country (cannot be put with pictures due to scroll view horizontal) */}
             <View style={homeStyles.textAreaContainer}>
                 {data.rockets.map((rocketData: {name: string; country: string;}, itemIndex: number)=>{
                     const inputRange=[
@@ -128,7 +155,7 @@ const RocketView = (props: HomeProps) => {
                     return (
                         <View style={{ width: windowWidth, paddingHorizontal: windowWidth * 25 / 100 }}>
                         <TouchableOpacity style={{ width: "100%", height: windowHeight * 60 / 100 }} onPress={() => props.navigation.navigate("Details", rocketDataArray)}>
-                            <FastImage source={{ uri: String(imageURL[index])}} style={homeStyles.rocketImage} />
+                            <FastImage source={imageURL[index]===undefined? require("./assets/pictures/loading_circle.gif"): { uri: String(imageURL[index])}} style={homeStyles.rocketImage}/>
                         </TouchableOpacity>
                         </View>
                     );
@@ -161,11 +188,12 @@ const RocketView = (props: HomeProps) => {
 //functional component to export to navigation
 const Home: FunctionComponent<HomeProps> = (props) => {
     return (
+        
         <>
-            <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
-            <FastImage style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>
-                <RocketView navigation={props.navigation} />
-            </FastImage>
+        <StatusBar barStyle="light-content" backgroundColor={"#000000"}/>
+        <FastImage style={{ flex:1 }} source={require('./assets/pictures/stars.gif')}>
+            <RocketView navigation={props.navigation} />
+        </FastImage>
         </>
     );
 };

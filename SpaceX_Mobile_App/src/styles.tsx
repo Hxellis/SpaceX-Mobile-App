@@ -24,7 +24,6 @@ export const homeStyles = StyleSheet.create({
     },
     headerImage: {
         flex: 1,
-        width: "100%",
     },
 
     textAreaContainer:{
