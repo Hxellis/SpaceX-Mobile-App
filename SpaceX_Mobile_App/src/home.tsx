@@ -28,6 +28,7 @@ const RocketView = (props: HomeProps) => {
     
     //loads data from GraphQL
     const { data, loading, error } = useQuery(GET_ROCKETS);
+    console.log(error);
 
     //hooks to update data
     const [launched, setLaunched] = useState(false);
@@ -47,8 +48,8 @@ const RocketView = (props: HomeProps) => {
                 //update hook with url array with the image links
                 setImageURL(url);
             })
-            .catch(function (error){
-                console.log("Error generating image URL: " + error);
+            .catch(function (e){
+                console.log("Error generating image URL: " + e);
                 setErrorState(true);
             });
             
@@ -85,7 +86,7 @@ const RocketView = (props: HomeProps) => {
             </FastImage>
         )}
         {/* render error screen if GraphQL data somehow dies or fail to get pictures from wikipedia */}
-        {error || errorState && (
+        {(error || errorState) && (
             <View style={{ backgroundColor: "#FFFFFF", height: "100%", justifyContent: 'center' }}>
                 <View style={[homeStyles.errorContainer]}>
                     <FastImage style={{ flex: 1 }} resizeMode="contain" source={require("./assets/pictures/load_failed.png")}/>

@@ -28,7 +28,6 @@ Bonus Points
 
 //libraries import
 import React, { FunctionComponent } from "react";
-import * as ReactDOM from "react-dom";
 import Navigator from "./src/Navigator";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 
